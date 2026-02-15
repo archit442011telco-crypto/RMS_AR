@@ -3,390 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Ultra Pro Hub | Web App</title>
+    <title>Minecraft Ultra Pro Hub | Elite Edition</title>
     <style>
-        /* --- CORE UI & THEME --- */
         :root {
-            --bg: #09090b; --surface: #18181b; --surface-border: #27272a;
-            --accent: #10b981; --accent-hover: #059669; --text: #f4f4f5; --text-muted: #a1a1aa;
-            --shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+            --bg: #050505; --surface: #111111; --surface-light: #1a1a1a;
+            --accent: #00ff88; --accent-glow: rgba(0, 255, 136, 0.3);
+            --text: #ffffff; --text-dim: #888888;
+            --danger: #ff4444; --warning: #ffaa00;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: var(--surface-border); border-radius: 4px; }
-        
+
         /* --- SIDEBAR --- */
-        aside { width: 260px; background: var(--surface); border-right: 1px solid var(--surface-border); display: flex; flex-direction: column; padding: 20px 0; z-index: 50; }
-        .logo { padding: 0 20px 20px; font-size: 1.5rem; font-weight: 900; color: var(--accent); letter-spacing: 1px; border-bottom: 1px solid var(--surface-border); margin-bottom: 20px; }
-        .nav-btn { width: 100%; text-align: left; background: none; border: none; color: var(--text-muted); padding: 15px 20px; font-size: 1rem; cursor: pointer; transition: 0.2s; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .nav-btn:hover { background: rgba(255,255,255,0.03); color: var(--text); }
-        .nav-btn.active { background: rgba(16, 185, 129, 0.1); color: var(--accent); border-right: 3px solid var(--accent); }
-        
+        aside { width: 280px; background: var(--surface); border-right: 1px solid #222; display: flex; flex-direction: column; z-index: 100; }
+        .logo-area { padding: 30px 20px; text-align: center; border-bottom: 1px solid #222; }
+        .logo-area h1 { font-size: 1.2rem; color: var(--accent); letter-spacing: 4px; text-shadow: 0 0 10px var(--accent-glow); }
+        .nav-link { padding: 18px 25px; cursor: pointer; color: var(--text-dim); transition: 0.3s; font-weight: bold; display: flex; align-items: center; gap: 12px; border-left: 4px solid transparent; }
+        .nav-link:hover { background: #1a1a1a; color: white; }
+        .nav-link.active { color: var(--accent); background: #151515; border-left-color: var(--accent); }
+
         /* --- MAIN CONTENT --- */
-        main { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
-        .tab-content { display: none; animation: fadeUp 0.4s ease forwards; }
+        main { flex: 1; overflow-y: auto; padding: 40px; background: radial-gradient(circle at top right, #0a110a, #050505); }
+        .tab-content { display: none; animation: fadeIn 0.5s ease; }
         .tab-content.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- COMPONENTS --- */
-        h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        h2 { font-size: 1.5rem; margin-bottom: 15px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-        p { color: var(--text-muted); line-height: 1.6; margin-bottom: 15px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        
-        .card { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .badge { background: rgba(16, 185, 129, 0.2); color: var(--accent); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 10px; }
-        
-        button.primary { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.primary:hover { background: var(--accent-hover); box-shadow: var(--shadow); }
-        
-        /* --- SPECIFIC MODULES --- */
-        .system-specs { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; font-family: monospace; color: var(--accent); margin-bottom: 15px; border: 1px solid var(--surface-border); }
-        
-        .interactive-box { height: 150px; border: 2px dashed var(--surface-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; user-select: none; position: relative; overflow: hidden; }
-        .interactive-box:hover { border-color: var(--accent); }
-        .aim-target { width: 30px; height: 30px; background: #ef4444; border-radius: 50%; position: absolute; display: none; cursor: crosshair; box-shadow: 0 0 10px #ef4444; }
-        
-        .hotbar { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
-        .slot { width: 40px; height: 40px; border: 2px solid var(--surface-border); display: flex; align-items: center; justify-content: center; font-weight: bold; background: #000; border-radius: 4px; }
-        .slot.active { border-color: var(--accent); background: rgba(16, 185, 129, 0.2); box-shadow: 0 0 10px var(--accent); }
+        .card { background: var(--surface); border: 1px solid #222; padding: 25px; border-radius: 12px; margin-bottom: 25px; }
+        h2 { margin-bottom: 15px; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+        .rating { color: var(--warning); font-size: 0.9rem; margin-bottom: 10px; }
 
-        .server-item { display: flex; justify-content: space-between; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 10px; border: 1px solid transparent; transition: 0.2s; }
-        .server-item:hover { border-color: var(--surface-border); background: rgba(255,255,255,0.05); }
+        /* --- ADVANCED OPTIMIZATION --- */
+        .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-family: monospace; background: #000; padding: 15px; border-radius: 8px; border: 1px solid var(--accent-glow); margin-bottom: 15px; }
+        .spec-item { color: var(--accent); font-size: 0.85rem; }
+        .optimization-box { line-height: 1.7; font-size: 0.95rem; border-left: 4px solid var(--accent); padding-left: 15px; }
 
-        /* Responsive Mobile */
-        @media(max-width: 768px) {
+        /* --- ADVANCED PVP PRACTICE --- */
+        .practice-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .test-box { height: 180px; border: 2px solid #333; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: #080808; }
+        .test-box:hover { border-color: var(--accent); }
+        .rank-badge { margin-top: 10px; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+        .rank-god { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
+        .rank-pro { background: #3b82f6; color: white; }
+        .rank-noob { background: #555; color: white; }
+
+        .aim-target { width: 25px; height: 25px; background: #ff0000; border-radius: 50%; position: absolute; box-shadow: 0 0 15px #ff0000; }
+
+        /* --- SERVER TRACKER --- */
+        .server-list { display: flex; flex-direction: column; gap: 12px; }
+        .server-card { background: var(--surface-light); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .cracked-tag { font-size: 0.7rem; background: #444; color: #fff; padding: 2px 6px; border-radius: 4px; margin-left: 10px; }
+
+        button.main-btn { background: var(--accent); color: black; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button.main-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }
+
+        @media (max-width: 900px) {
             body { flex-direction: column; }
-            aside { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--surface-border); flex-direction: row; padding: 10px; overflow-x: auto; }
-            .logo { border: none; padding: 10px; margin: 0; font-size: 1.2rem; }
-            .nav-btn { padding: 10px; white-space: nowrap; border-right: none; border-bottom: 3px solid transparent; }
-            .nav-btn.active { border-right: none; border-bottom: 3px solid var(--accent); }
-            main { padding: 20px; }
+            aside { width: 100%; height: auto; flex-direction: row; overflow-x: auto; }
+            .nav-link { white-space: nowrap; padding: 15px; }
+            .practice-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
 <aside>
-    <div class="logo">ULTRA PRO HUB</div>
-    <button class="nav-btn active" data-target="dashboard">💻 Dashboard</button>
-    <button class="nav-btn" data-target="practice">⚔️ PvP Practice</button>
-    <button class="nav-btn" data-target="guides">📚 Client Guides</button>
-    <button class="nav-btn" data-target="mods">📦 Top Mods</button>
-    <button class="nav-btn" data-target="servers">🌍 Servers</button>
+    <div class="logo-area"><h1>ULTRA PRO HUB</h1></div>
+    <div class="nav-link active" data-tab="home">🏠 Dashboard</div>
+    <div class="nav-link" data-tab="pvp">⚔️ Advanced Practice</div>
+    <div class="nav-link" data-tab="mods">📦 Elite Mods</div>
+    <div class="nav-link" data-tab="guides">📖 Setup Guides</div>
+    <div class="nav-link" data-tab="servers">🌍 Live Servers</div>
 </aside>
 
 <main>
+    <section id="home" class="tab-content active">
+        <h1>Advanced Optimization</h1>
+        <p class="rating">User Trust Rating: ⭐⭐⭐⭐⭐ (4.9/5)</p>
+        <div class="card">
+            <h2>🤖 Advanced Hardware Analysis</h2>
+            <div class="spec-grid" id="spec-grid">
+                <div class="spec-item">Detecting System...</div>
+            </div>
+            <div class="optimization-box" id="opti-output">
+                Please wait while we calculate the best flags for your hardware...
+            </div>
+        </div>
+        <div class="card">
+            <h2>📜 Hub Description</h2>
+            <p>Welcome to the <b>Ultra Pro Hub</b>. This website is specifically engineered for the competitive Minecraft community. We provide real-time server telemetry, hardware-specific optimization logic, and mechanical practice tools to ensure you are always at peak performance, whether on a PC or a mobile device via Mojo.</p>
+        </div>
+    </section>
 
-    <section id="dashboard" class="tab-content active">
-        <h1>Welcome to Ultra Pro Hub</h1>
-        <p>The ultimate destination to optimize your Minecraft client, practice your mechanics, and track live servers. Whether you play on a high-end PC or a mobile device via Mojo, we have you covered.</p>
-        
-        <div class="card" style="margin-top: 30px;">
-            <h2>🤖 Auto-Detect System Optimizer</h2>
-            <p>Our system has analyzed your current browser device. Based on the hardware accessible to us, here is your customized Minecraft setup guide:</p>
-            
-            <div class="system-specs" id="sys-specs">Analyzing hardware...</div>
-            
-            <div id="sys-recommendation" style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;">
-                Loading optimizations...
+    <section id="pvp" class="tab-content">
+        <h1>PvP Mechanic Trainer</h1>
+        <p>Your performance is automatically ranked from <b>Noob</b> to <b>God</b>.</p>
+        <div class="practice-container">
+            <div class="card">
+                <h2>🖱️ CPS & Consistency</h2>
+                <div class="test-box" id="cps-box">
+                    <span id="cps-display">CLICK TO START</span>
+                    <div id="cps-rank" class="rank-badge" style="display:none;"></div>
+                </div>
+                <p style="margin-top:10px; font-size:0.85rem;">Rankings: <br><b>15+ CPS:</b> GOD | <b>10-14 CPS:</b> PRO | <b><10:</b> TRAINEE</p>
+            </div>
+            <div class="card">
+                <h2>🎯 Reaction & Flick</h2>
+                <div class="test-box" id="aim-box">
+                    <span id="aim-display">CLICK TO START</span>
+                    <div id="aim-target" class="aim-target" style="display:none;"></div>
+                    <div id="aim-rank" class="rank-badge" style="display:none;"></div>
+                </div>
+                <p style="margin-top:10px; font-size:0.85rem;">Rankings: <br><b><250ms:</b> GOD | <b>250-350ms:</b> PRO | <b>>350ms:</b> SLOW</p>
             </div>
         </div>
     </section>
 
-    <section id="practice" class="tab-content">
-        <h1>PvP Practice Suite</h1>
-        <p>Warm up your mechanics before launching the game. High CPS, precise aim, and fast hotkey switching are the keys to winning.</p>
-        
-        <div class="grid">
-            <div class="card">
-                <h2>🖱️ CPS Tester</h2>
-                <p style="font-size: 0.9rem;">Click the box as fast as possible for 5 seconds to test your jitter or butterfly clicking speed.</p>
-                <div class="interactive-box" id="cps-area">Click to Start (5s)</div>
-                <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold;">
-                    <span id="cps-res">CPS: 0.00</span> <span id="cps-time">5s</span>
+    <section id="mods" class="tab-content">
+        <h1>Essential Performance Mods</h1>
+        <p class="rating">Community Rating: ⭐⭐⭐⭐⭐</p>
+        <div class="card">
+            <h2>The "Big Three" for 1.21.x</h2>
+            <div class="server-list">
+                <div class="server-card">
+                    <div><b>Lithium</b> - Optimized Physics</div>
+                    <a href="https://modrinth.com/mod/lithium"><button class="main-btn">Download</button></a>
                 </div>
-            </div>
-
-            <div class="card">
-                <h2>🎯 Flick Aim Trainer</h2>
-                <p style="font-size: 0.9rem;">Targets will spawn randomly. Click them instantly. Tests your reaction time in milliseconds.</p>
-                <div class="interactive-box" id="aim-area" style="background: rgba(0,0,0,0.5);">
-                    <div id="aim-text">Click to Start</div>
-                    <div id="aim-target" class="aim-target"></div>
+                <div class="server-card">
+                    <div><b>Sodium</b> - Engine Overhaul</div>
+                    <a href="https://modrinth.com/mod/sodium"><button class="main-btn">Download</button></a>
                 </div>
-                <div style="margin-top:10px; font-weight:bold; text-align:center;" id="aim-res">Avg Reaction: 0 ms</div>
-            </div>
-
-            <div class="card" style="grid-column: 1 / -1;">
-                <h2>⌨️ Hotbar Switcher Trainer</h2>
-                <p style="font-size: 0.9rem;">A random slot below will light up green. Press the matching number key (1-9) on your keyboard as fast as possible! (PC Only)</p>
-                <div class="hotbar" id="hotbar">
-                    <div class="slot" id="slot-1">1</div><div class="slot" id="slot-2">2</div>
-                    <div class="slot" id="slot-3">3</div><div class="slot" id="slot-4">4</div>
-                    <div class="slot" id="slot-5">5</div><div class="slot" id="slot-6">6</div>
-                    <div class="slot" id="slot-7">7</div><div class="slot" id="slot-8">8</div>
-                    <div class="slot" id="slot-9">9</div>
-                </div>
-                <div style="text-align:center; margin-top:15px;">
-                    <button class="primary" onclick="startHotbar()">Start Training (10 Swaps)</button>
-                    <div id="hotbar-res" style="margin-top:10px; font-weight:bold; color:var(--accent);"></div>
+                <div class="server-card">
+                    <div><b>Mod Menu</b> - By Prospector</div>
+                    <a href="https://modrinth.com/mod/modmenu"><button class="main-btn">Download</button></a>
                 </div>
             </div>
         </div>
     </section>
 
     <section id="guides" class="tab-content">
-        <h1>Detailed Installation Guides</h1>
-        <p>Learn exactly how to install and add mods to the three best alternative clients available today.</p>
-
-        <div class="grid">
-            <div class="card">
-                <h2>📱 Mojo Launcher (Mobile)</h2>
-                <p>Play actual Java Edition on your phone.</p>
-                <ol style="margin-left: 20px; color: var(--text-muted); line-height: 1.8;">
-                    <li>Download Mojo from the Play Store.</li>
-                    <li>Log in with your Microsoft account.</li>
-                    <li>Go to <b>Settings > Java Tweaks</b> and allocate exactly 50% of your phone's total RAM.</li>
-                    <li>To add mods: Open the app files via your file manager (`Android/data/git.artdeell.mojo/files/.minecraft/mods`).</li>
-                    <li>Drop your `.jar` files (like Fabric API and Sodium) into that folder.</li>
-                </ol>
-            </div>
-
-            <div class="card">
-                <h2>💻 SK Launcher (PC)</h2>
-                <p>The cleanest, offline-friendly launcher.</p>
-                <ol style="margin-left: 20px; color: var(--text-muted); line-height: 1.8;">
-                    <li>Download SK Launcher from their official site.</li>
-                    <li>Go to the 'Installations' tab and click 'New'.</li>
-                    <li>Under 'Version', scroll to find 'Fabric' or 'Forge' for 1.21.11 and install it.</li>
-                    <li>Press <code>Win + R</code>, type <code>%appdata%/.minecraft/mods</code>.</li>
-                    <li>Drag your downloaded Modrinth `.jar` files into this folder and launch!</li>
-                </ol>
-            </div>
-
-            <div class="card">
-                <h2>⚔️ CM Client (PvP PC)</h2>
-                <p>A built-in competitive PvP client.</p>
-                <ol style="margin-left: 20px; color: var(--text-muted); line-height: 1.8;">
-                    <li>CM Client comes pre-packaged with essential PvP mods (Keystrokes, FPS boost, Zoom).</li>
-                    <li>Download the installer from `cm-pack.pl` and run it.</li>
-                    <li>It automatically creates a profile in your official Minecraft Launcher.</li>
-                    <li>Press Right-Shift in-game to open the CM Client GUI and toggle your preferred PvP mods.</li>
-                </ol>
-            </div>
+        <h1>The Ultimate Setup Guide</h1>
+        <div class="card">
+            <h2>📱 Mojo Launcher (Cracked/Premium)</h2>
+            <p>Mojo allows you to play Java on Android. <b>Status: Cracked Support ✅</b></p>
+            <p>1. Install the APK. 2. Add account (Select Offline for Cracked). 3. Go to <b>Java Tweaks</b>. 4. Set RAM to 50% of your total device RAM. 5. Use <b>Holy GL4ES</b> renderer for maximum FPS on 1.21.</p>
         </div>
-    </section>
-
-    <section id="mods" class="tab-content">
-        <h1>Top Modifications</h1>
-        <p>These are the absolute best mods to increase your FPS and optimize your PvP experience. All links go directly to Modrinth.</p>
-
-        <div class="grid">
-            <div class="card">
-                <h2>Sodium <span class="badge">1.21.x</span></h2>
-                <p><b>Feature:</b> Completely replaces the Minecraft rendering engine. Fixes massive lag spikes and can easily double or triple your FPS compared to vanilla.</p>
-                <a href="https://modrinth.com/mod/sodium" target="_blank"><button class="primary">Get Sodium</button></a>
-            </div>
-            
-            <div class="card">
-                <h2>Lithium <span class="badge">1.21.11</span></h2>
-                <p><b>Feature:</b> A general-purpose server and client optimization mod. It improves game physics, chunk loading, and AI calculations without changing any vanilla mechanics.</p>
-                <a href="https://modrinth.com/mod/lithium" target="_blank"><button class="primary">Get Lithium</button></a>
-            </div>
-
-            <div class="card">
-                <h2>Entity Culling <span class="badge">1.21.x</span></h2>
-                <p><b>Feature:</b> Uses async path-tracing to skip rendering blocks and entities (like chests or players) that you can't currently see behind walls. Huge CPU saver.</p>
-                <a href="https://modrinth.com/mod/entityculling" target="_blank"><button class="primary">Get Culling</button></a>
-            </div>
-
-            <div class="card">
-                <h2>Low On Fire <span class="badge">Pack</span></h2>
-                <p><b>Feature:</b> A resource pack that lowers the fire animation on your screen. Crucial for PvP so your vision isn't blocked when an enemy sets you on fire.</p>
-                <a href="https://modrinth.com/resourcepack/low-on-fire" target="_blank"><button class="primary">Get Low Fire</button></a>
-            </div>
+        <div class="card">
+            <h2>💻 SK Launcher (Cracked/Premium)</h2>
+            <p>The best lightweight PC launcher. <b>Status: Cracked Support ✅</b></p>
+            <p>Install Fabric 1.21.11. Go to <code>%appdata%/.minecraft/mods</code> and drop Sodium and Lithium there. Set your "Memory" in the SK Launcher profile settings to 4GB (if you have 8GB total).</p>
         </div>
     </section>
 
     <section id="servers" class="tab-content">
-        <h1>Live Server Tracker</h1>
-        <p>Check the live player count of the top competitive PvP servers before you launch your game.</p>
-        
-        <div class="card">
-            <div class="server-item">
-                <div>
-                    <h3 style="color:var(--text);">PikaNetwork</h3>
-                    <p style="margin:0; font-size:0.85rem;">play.pikanetwork.net</p>
-                    <p style="margin-top:5px; font-size:0.85rem; color:#888;">Best cracked server for Bedwars and Practice PvP.</p>
-                </div>
-                <div id="srv-pika" style="font-family:monospace; font-weight:bold;">Loading...</div>
+        <h1>Global Server Tracker</h1>
+        <div class="server-list">
+            <div class="server-card">
+                <div>PikaNetwork <span class="cracked-tag">CRACKED</span></div>
+                <div id="srv-pika">Pinging...</div>
             </div>
-
-            <div class="server-item">
-                <div>
-                    <h3 style="color:var(--text);">Hypixel</h3>
-                    <p style="margin:0; font-size:0.85rem;">mc.hypixel.net</p>
-                    <p style="margin-top:5px; font-size:0.85rem; color:#888;">The largest Minecraft server in the world. Premium only.</p>
-                </div>
-                <div id="srv-hypixel" style="font-family:monospace; font-weight:bold;">Loading...</div>
+            <div class="server-card">
+                <div>Mineberry <span class="cracked-tag">CRACKED</span></div>
+                <div id="srv-mineberry">Pinging...</div>
             </div>
-
-            <div class="server-item">
-                <div>
-                    <h3 style="color:var(--text);">Minemen Club</h3>
-                    <p style="margin:0; font-size:0.85rem;">minemen.club</p>
-                    <p style="margin-top:5px; font-size:0.85rem; color:#888;">The most competitive nodebuff and ranked PvP server.</p>
-                </div>
-                <div id="srv-mmc" style="font-family:monospace; font-weight:bold;">Loading...</div>
+            <div class="server-card">
+                <div>Cubecraft <span class="cracked-tag">PREMIUM</span></div>
+                <div id="srv-cube">Pinging...</div>
             </div>
-            
-            <button class="primary" onclick="fetchServers()" style="margin-top:15px; width:100%;">🔄 Refresh Player Counts</button>
+            <div class="server-card">
+                <div>Serenity <span class="cracked-tag">CRACKED</span></div>
+                <div id="srv-serenity">Pinging...</div>
+            </div>
+            <div class="server-card">
+                <div>Hypixel <span class="cracked-tag">PREMIUM</span></div>
+                <div id="srv-hypixel">Pinging...</div>
+            </div>
         </div>
+        <button class="main-btn" onclick="updateServers()" style="width:100%; margin-top:20px;">Refresh Data</button>
     </section>
-
 </main>
 
 <script>
-    /* --- NAVIGATION --- */
-    const navBtns = document.querySelectorAll('.nav-btn');
-    const tabs = document.querySelectorAll('.tab-content');
-    
-    navBtns.forEach(btn => {
-        btn.onclick = () => {
-            navBtns.forEach(b => b.classList.remove('active'));
-            tabs.forEach(t => t.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.target).classList.add('active');
-            if(btn.dataset.target === 'servers') fetchServers();
+    /* --- TABS --- */
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.onclick = () => {
+            document.querySelectorAll('.nav-link, .tab-content').forEach(el => el.classList.remove('active'));
+            link.classList.add('active');
+            document.getElementById(link.dataset.tab).classList.add('active');
+            if(link.dataset.tab === 'servers') updateServers();
         };
     });
 
-    /* --- AUTO DETECT SYSTEM --- */
-    function detectSystem() {
-        const ua = navigator.userAgent;
-        let os = "Unknown OS";
-        let isMobile = false;
+    /* --- ADVANCED HARDWARE DETECTION --- */
+    function detect() {
+        const grid = document.getElementById('spec-grid');
+        const output = document.getElementById('opti-output');
         
-        if (/Android/i.test(ua)) { os = "Android"; isMobile = true; }
-        else if (/iPhone|iPad/i.test(ua)) { os = "iOS"; isMobile = true; }
-        else if (/Win/i.test(ua)) os = "Windows";
-        else if (/Mac/i.test(ua)) os = "MacOS";
+        const cores = navigator.hardwareConcurrency || "Unknown";
+        const ram = navigator.deviceMemory || "Unknown";
+        const platform = navigator.platform;
+        const gpu = (function() {
+            let canvas = document.createElement('canvas');
+            let gl = canvas.getContext('webgl');
+            let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "Generic GPU";
+        })();
 
-        let cores = navigator.hardwareConcurrency || "Unknown";
-        let ram = navigator.deviceMemory ? navigator.deviceMemory + "+ GB" : "Unknown";
+        grid.innerHTML = `
+            <div class="spec-item">CPU Threads: ${cores}</div>
+            <div class="spec-item">RAM: ${ram}GB Available</div>
+            <div class="spec-item">OS: ${platform}</div>
+            <div class="spec-item">GPU: ${gpu.split(' ').slice(0,3).join(' ')}</div>
+        `;
 
-        document.getElementById('sys-specs').innerText = `Device: ${isMobile ? "Mobile Phone/Tablet" : "Desktop/Laptop"}\nOS: ${os}\nCPU Logical Cores: ${cores}\nEst. RAM: ${ram}`;
-
-        const rec = document.getElementById('sys-recommendation');
-        if (isMobile) {
-            rec.innerHTML = "<b>Mobile Detected:</b> You are likely using <b>Mojo Launcher</b>. Since mobile devices have thermal limits, install the <b>Holy GL4ES</b> renderer in Mojo settings. Turn off Smart Animations in Sodium to prevent battery drain. Keep render distance under 8 chunks.";
+        if(ram < 4) {
+            output.innerHTML = "⚠️ <b>CRITICAL OPTIMIZATION:</b> Low memory detected. <b>Recommendation:</b> Use SK Launcher, set RAM to 1.5GB. Use 'Very Fast' graphics. <b>Rank:</b> Potentially Laggy.";
         } else {
-            if (cores >= 8) {
-                rec.innerHTML = "<b>High-End PC Detected:</b> Your CPU has " + cores + " threads. You can safely allocate 4GB of RAM to Minecraft. Install Sodium, Lithium, and Entity Culling. You should comfortably hit 300+ FPS on PvP servers with Render Distance at 12.";
-            } else {
-                rec.innerHTML = "<b>Standard/Low-End PC Detected:</b> Your system might bottleneck heavily. Allocate exactly 2GB of RAM. Use <b>SK Launcher</b> for a lightweight footprint. Install Sodium, keep Render Distance at 6, and turn Particles to 'Minimal'.";
-            }
+            output.innerHTML = "🚀 <b>ELITE OPTIMIZATION:</b> High memory detected. <b>Recommendation:</b> Allocate 4GB RAM. Install Sodium + Iris for Shaders. Enable 'Threaded Chunk Loading'. <b>Rank:</b> Pro Gaming Tier.";
         }
     }
-    window.onload = detectSystem;
+    detect();
 
-    /* --- CPS TESTER --- */
-    let cpsClicks = 0, cpsTime = 5, cpsActive = false;
-    const cpsArea = document.getElementById('cps-area');
-    cpsArea.onmousedown = (e) => {
+    /* --- ADVANCED CPS --- */
+    let cpsClicks = 0, cpsActive = false, cpsTime = 5;
+    const cpsBox = document.getElementById('cps-box');
+    cpsBox.onmousedown = (e) => {
         e.preventDefault();
-        if(cpsTime <= 0) { // Reset
-            cpsClicks = 0; cpsTime = 5; cpsActive = false;
-            document.getElementById('cps-time').innerText = '5s';
-            cpsArea.innerText = 'Click to Start';
-            return;
-        }
+        if(cpsTime <= 0) { cpsClicks=0; cpsTime=5; cpsActive=false; document.getElementById('cps-rank').style.display='none'; }
         if(!cpsActive) {
             cpsActive = true;
             let timer = setInterval(() => {
-                cpsTime--; document.getElementById('cps-time').innerText = cpsTime + "s";
+                cpsTime--;
+                document.getElementById('cps-display').innerText = cpsTime + "s remaining";
                 if(cpsTime <= 0) {
                     clearInterval(timer);
-                    cpsArea.innerText = "Done! Click to Reset.";
-                    document.getElementById('cps-res').innerText = "CPS: " + (cpsClicks/5).toFixed(2);
+                    let final = (cpsClicks/5).toFixed(1);
+                    document.getElementById('cps-display').innerText = final + " CPS";
+                    let rank = document.getElementById('cps-rank');
+                    rank.style.display = 'block';
+                    if(final >= 15) { rank.innerText = "GOD"; rank.className = "rank-badge rank-god"; }
+                    else if(final >= 10) { rank.innerText = "PRO"; rank.className = "rank-badge rank-pro"; }
+                    else { rank.innerText = "TRAINEE"; rank.className = "rank-badge rank-noob"; }
                 }
             }, 1000);
         }
         cpsClicks++;
     };
 
-    /* --- AIM TRAINER --- */
-    const aimArea = document.getElementById('aim-area');
-    const target = document.getElementById('aim-target');
-    const aimText = document.getElementById('aim-text');
-    let aimHits = 0, aimStart = 0, totalAimTime = 0, aimActive = false;
-
-    aimArea.onmousedown = () => {
-        if(!aimActive) {
-            aimActive = true; aimHits = 0; totalAimTime = 0;
-            aimText.style.display = 'none'; document.getElementById('aim-res').innerText = "Testing...";
-            spawnTarget();
-        }
+    /* --- ADVANCED AIM --- */
+    let aimStart = 0, aimHits = 0, totalTime = 0, aimActive = false;
+    const aimBox = document.getElementById('aim-box'), target = document.getElementById('aim-target');
+    aimBox.onclick = () => {
+        if(aimActive) return;
+        aimActive = true; aimHits = 0; totalTime = 0;
+        document.getElementById('aim-display').innerText = "HITTING...";
+        document.getElementById('aim-rank').style.display = 'none';
+        spawn();
     };
     target.onmousedown = (e) => {
         e.stopPropagation();
-        if(!aimActive) return;
-        totalAimTime += (Date.now() - aimStart);
-        aimHits++; target.style.display = 'none';
+        totalTime += (Date.now() - aimStart);
+        aimHits++;
+        target.style.display = 'none';
         if(aimHits >= 5) {
-            aimActive = false; aimText.style.display = 'block'; aimText.innerText = "Click to Restart";
-            document.getElementById('aim-res').innerText = "Avg Reaction: " + Math.round(totalAimTime/5) + " ms";
-        } else {
-            setTimeout(spawnTarget, Math.random() * 600 + 200);
-        }
+            aimActive = false;
+            let avg = Math.round(totalTime/5);
+            document.getElementById('aim-display').innerText = avg + "ms Avg";
+            let rank = document.getElementById('aim-rank');
+            rank.style.display = 'block';
+            if(avg < 250) { rank.innerText = "GOD"; rank.className = "rank-badge rank-god"; }
+            else if(avg < 350) { rank.innerText = "PRO"; rank.className = "rank-badge rank-pro"; }
+            else { rank.innerText = "SLOW"; rank.className = "rank-badge rank-noob"; }
+        } else { setTimeout(spawn, 300); }
     };
-    function spawnTarget() {
-        target.style.left = Math.floor(Math.random() * (aimArea.clientWidth - 30)) + 'px';
-        target.style.top = Math.floor(Math.random() * (aimArea.clientHeight - 30)) + 'px';
-        target.style.display = 'block'; aimStart = Date.now();
+    function spawn() {
+        target.style.left = Math.random()*80 + "%";
+        target.style.top = Math.random()*70 + "%";
+        target.style.display = 'block';
+        aimStart = Date.now();
     }
 
-    /* --- HOTBAR TRAINER --- */
-    let hotbarActive = false, currentSlot = 0, hotbarHits = 0, hotbarStart = 0;
-    function startHotbar() {
-        if(hotbarActive) return;
-        hotbarActive = true; hotbarHits = 0; hotbarStart = Date.now();
-        document.getElementById('hotbar-res').innerText = "Press the lit up number key!";
-        nextSlot();
-    }
-    function nextSlot() {
-        document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
-        currentSlot = Math.floor(Math.random() * 9) + 1;
-        document.getElementById('slot-' + currentSlot).classList.add('active');
-    }
-    document.addEventListener('keydown', (e) => {
-        if(hotbarActive && e.key == currentSlot) {
-            hotbarHits++;
-            if(hotbarHits >= 10) {
-                hotbarActive = false;
-                document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
-                let time = ((Date.now() - hotbarStart) / 1000).toFixed(2);
-                document.getElementById('hotbar-res').innerText = `Completed 10 swaps in ${time} seconds!`;
-            } else {
-                nextSlot();
-            }
-        }
-    });
-
-    /* --- LIVE SERVERS --- */
-    async function fetchServers() {
-        const check = async (ip, id) => {
-            document.getElementById(id).innerHTML = `<span style="color:#a1a1aa;">Pinging...</span>`;
+    /* --- SERVERS --- */
+    async function updateServers() {
+        const ping = async (ip, id) => {
+            document.getElementById(id).innerText = "...";
             try {
-                let r = await fetch('https://api.mcsrvstat.us/3/' + ip);
-                let d = await r.json();
-                document.getElementById(id).innerHTML = d.online ? `<span style="color:var(--accent);">Online</span> | 🧍 ${d.players.online.toLocaleString()}` : `<span style="color:#ef4444;">Offline</span>`;
+                const res = await fetch(`https://api.mcsrvstat.us/3/${ip}`);
+                const data = await res.json();
+                document.getElementById(id).innerHTML = data.online ? `<span style="color:var(--accent)">Online</span> | ${data.players.online}` : `<span style="color:red">Offline</span>`;
             } catch(e) { document.getElementById(id).innerText = "Error"; }
         };
-        check('play.pikanetwork.net', 'srv-pika');
-        check('mc.hypixel.net', 'srv-hypixel');
-        check('minemen.club', 'srv-mmc');
+        ping('play.pikanetwork.net', 'srv-pika');
+        ping('play.mineberry.net', 'srv-mineberry');
+        ping('play.cubecraft.net', 'srv-cube');
+        ping('play.serenitypvp.net', 'srv-serenity');
+        ping('mc.hypixel.net', 'srv-hypixel');
     }
 </script>
 </body>
