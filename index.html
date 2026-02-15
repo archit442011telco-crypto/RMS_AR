@@ -5,15 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft Ultra Pro Hub</title>
     <style>
-        /* --- CSS Variables --- */
         :root {
             --bg: #0b0f13;
             --text: #ffffff;
             --panel: rgba(20, 27, 34, 0.9);
-            --accent: #2ecc71;
-            --accent-hover: #27ae60;
-            --border: rgba(46, 204, 113, 0.3);
-            --shadow: 0 0 15px rgba(46, 204, 113, 0.2);
+            --accent: #00ff88;
+            --accent-hover: #00cc6e;
+            --border: rgba(0, 255, 136, 0.3);
+            --shadow: 0 0 15px rgba(0, 255, 136, 0.2);
             --transition: all 0.3s ease;
         }
 
@@ -21,35 +20,32 @@
             --bg: #f0f2f5;
             --text: #1a1a1a;
             --panel: rgba(255, 255, 255, 0.9);
-            --border: rgba(46, 204, 113, 0.5);
+            --border: rgba(0, 255, 136, 0.5);
         }
 
-        /* --- Base Styles --- */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg); color: var(--text); overflow-x: hidden; transition: var(--transition); }
         
         canvas { position: fixed; top: 0; left: 0; z-index: -1; pointer-events: none; }
 
-        /* --- Header & Nav --- */
         header { 
             padding: 20px; text-align: center; border-bottom: 2px solid var(--accent); 
             background: var(--panel); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;
         }
         h1 { color: var(--accent); text-transform: uppercase; letter-spacing: 3px; font-size: 1.8rem; }
         
-        .header-btns { margin-top: 15px; display: flex; justify-content: center; gap: 10px; }
+        .header-btns { margin-top: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         button { 
-            background: var(--accent); color: white; border: none; padding: 10px 18px; 
+            background: var(--accent); color: #0b0f13; border: none; padding: 10px 18px; 
             border-radius: 6px; cursor: pointer; font-weight: bold; transition: var(--transition);
         }
         button:hover { background: var(--accent-hover); transform: scale(1.05); }
         .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--text); }
 
         nav { display: flex; overflow-x: auto; background: rgba(0,0,0,0.3); padding: 10px; gap: 10px; justify-content: center; }
-        .nav-link { padding: 8px 15px; cursor: pointer; border-radius: 4px; white-space: nowrap; }
-        .nav-link.active { background: var(--accent); color: white; }
+        .nav-link { padding: 8px 15px; cursor: pointer; border-radius: 4px; white-space: nowrap; font-weight: bold; }
+        .nav-link.active { background: var(--accent); color: #0b0f13; }
 
-        /* --- Content Layout --- */
         main { max-width: 1100px; margin: 20px auto; padding: 0 15px; }
         .tab-content { display: none; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
@@ -61,21 +57,18 @@
         }
         h2 { color: var(--accent); margin-bottom: 15px; border-left: 4px solid var(--accent); padding-left: 10px; }
 
-        /* --- Tools & Grid --- */
         .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media(min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
 
         #cps-area { 
             height: 120px; border: 2px dashed var(--accent); border-radius: 10px; 
             display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem;
+            user-select: none;
         }
-        .stats { display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; }
 
         .mod-card { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
         .mod-card a { color: var(--accent); text-decoration: none; font-weight: bold; display: block; margin-top: 10px; }
-
-        .guide-box { background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 8px; line-height: 1.6; }
-        li { margin-left: 20px; margin-bottom: 8px; }
+        .version-tag { font-size: 0.75rem; background: var(--accent); color: #000; padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
 
         footer { text-align: center; padding: 40px; color: #777; font-size: 0.9rem; }
     </style>
@@ -90,7 +83,7 @@
     <div class="header-btns">
         <button id="musicToggle" class="btn-outline">🎵 Play Music</button>
         <button id="themeToggle" class="btn-outline">☀️ Theme</button>
-        <a href="https://modrinth.com" target="_blank"><button>🌐 Modrinth Site</button></a>
+        <a href="https://modrinth.com" target="_blank"><button>🌐 Modrinth Home</button></a>
     </div>
 </header>
 
@@ -107,24 +100,25 @@
             <div class="panel">
                 <h2>CPS Tester (5s)</h2>
                 <div id="cps-area">Click to Start!</div>
-                <div class="stats">
+                <div style="display:flex; justify-content:space-between; margin-top:10px; font-weight:bold;">
                     <span>Clicks: <span id="clicks">0</span></span>
                     <span>Time: <span id="timer">5</span>s</span>
                 </div>
                 <div id="cps-result" style="margin-top:10px; color:var(--accent); font-weight:bold;"></div>
+                <button id="reset-cps" style="width:100%; margin-top:10px; display:none;">Reset Test</button>
             </div>
             <div class="panel">
                 <h2>FPS Boost Guide</h2>
                 <div id="fps-init">
-                    <button onclick="showFps('pc')">💻 I'm on PC</button>
-                    <button onclick="showFps('phone')" class="btn-outline">📱 I'm on Phone</button>
+                    <button onclick="showFps('pc')">💻 PC</button>
+                    <button onclick="showFps('phone')" class="btn-outline">📱 Mojo Launcher</button>
                 </div>
                 <div id="fps-pc" style="display:none;">
-                    <p>Enter RAM (GB):</p>
-                    <input type="number" id="ramInput" style="width:100%; padding:8px; margin:10px 0;">
-                    <button onclick="calcPc()">Get Settings</button>
+                    <p>Enter PC RAM (GB):</p>
+                    <input type="number" id="ramInput" style="width:100%; padding:8px; margin:10px 0; background:#1e293b; color:white; border:1px solid var(--accent); border-radius:5px;">
+                    <button onclick="calcPc()" style="width:100%;">Get Optimization</button>
                 </div>
-                <div id="fps-res" class="guide-box" style="display:none; margin-top:10px;"></div>
+                <div id="fps-res" style="display:none; margin-top:10px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; font-size:0.9rem;"></div>
             </div>
         </div>
     </section>
@@ -132,14 +126,11 @@
     <section id="mojo" class="tab-content">
         <div class="panel">
             <h2>Mojo Launcher Tutorial</h2>
-            <div class="guide-box">
-                <ol>
-                    <li><strong>Installation:</strong> Download Mojo Launcher from the Play Store or GitHub.</li>
-                    <li><strong>Login:</strong> Use your Microsoft account to log in securely.</li>
-                    <li><strong>Java Settings:</strong> Go to Settings > Java Tweaks. Set "Memory" to roughly 50% of your phone's total RAM.</li>
-                    <li><strong>Renderer:</strong> Select "Holy GL4ES" for the best FPS on newer Android versions.</li>
-                    <li><strong>Versions:</strong> Click "Add New" and pick 1.8.9 for PvP or 1.21.1 for survival.</li>
-                </ol>
+            <div style="line-height:1.6;">
+                <p>1. <b>Download:</b> Install Mojo Launcher from the Play Store link in the Mods tab.</p>
+                <p>2. <b>RAM:</b> In Settings > Java Tweaks, allocate half of your phone's RAM.</p>
+                <p>3. <b>Performance:</b> Use the <b>Holy GL4ES</b> renderer for the best FPS on 1.21 versions.</p>
+                <p>4. <b>Controls:</b> Open "Custom Controls" to move the Attack button for a 4-finger claw setup.</p>
             </div>
         </div>
     </section>
@@ -148,61 +139,56 @@
         <div class="grid">
             <div class="panel">
                 <h2>PC PvP Pro Tips</h2>
-                <ul>
-                    <li><strong>W-Tapping:</strong> Tap 'W' immediately after hitting an enemy to reset your sprint. This increases knockback.</li>
-                    <li><strong>Strafing:</strong> Use 'A' and 'D' keys to circle your opponent, making you harder to hit.</li>
-                    <li><strong>Jitter/Butterfly:</strong> High CPS (12+) helps reduce the knockback you take.</li>
-                </ul>
+                <p>• <b>W-Tapping:</b> Reset sprint after every hit for max knockback.</p>
+                <p>• <b>S-Tapping:</b> Hold 'S' briefly to stay out of enemy reach.</p>
+                <p>• <b>Tracking:</b> Focus on the enemy's feet for better aim stability.</p>
             </div>
             <div class="panel">
                 <h2>Mojo (Phone) PvP</h2>
-                <ul>
-                    <li><strong>Claw Grip:</strong> Use 4 fingers. Left thumb for movement, right thumb for aim, index fingers for attack/jump.</li>
-                    <li><strong>Sprint Button:</strong> Map a dedicated button for "Sprint" in the custom controls for easier comboing.</li>
-                    <li><strong>Sensitivity:</strong> Keep sensitivity lower on mobile to ensure your aim doesn't shake during clicking.</li>
-                </ul>
+                <p>• <b>Claw Grip:</b> Use index fingers for jumping/attacking.</p>
+                <p>• <b>Sprint Toggle:</b> Map a dedicated sprint button in Mojo settings.</p>
+                <p>• <b>Distance:</b> Use high sensitivity to turn quickly during combos.</p>
             </div>
         </div>
     </section>
 
     <section id="mods" class="tab-content">
         <div class="panel">
-            <h2>Recommended Launchers</h2>
-            <div class="grid">
+            <h2>Launchers</h2>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
                 <div class="mod-card"><h3>CM Client</h3><a href="https://cm-pack.pl/" target="_blank">Download</a></div>
                 <div class="mod-card"><h3>SK Launcher</h3><a href="https://sklauncher.pl/" target="_blank">Download</a></div>
-                <div class="mod-card"><h3>Mojo (Mobile)</h3><a href="https://play.google.com/store/apps/details?id=git.artdeell.mojo" target="_blank">Download</a></div>
+                <div class="mod-card"><h3>Mojo Phone</h3><a href="https://play.google.com/store/apps/details?id=git.artdeell.mojo" target="_blank">Play Store</a></div>
             </div>
         </div>
         <div class="panel">
-            <h2>Performance Mods & Low Fire (Modrinth)</h2>
+            <h2>Modrinth 1.21.x Essentials</h2>
             <div class="grid">
-                <div class="mod-card"><h3>1.8.9 Low Fire</h3><a href="https://modrinth.com/resourcepack/low-fire" target="_blank">Get Pack</a></div>
-                <div class="mod-card"><h3>1.21 Low Fire</h3><a href="https://modrinth.com/resourcepack/low-on-fire" target="_blank">Get Pack</a></div>
-                <div class="mod-card"><h3>Sodium (1.21)</h3><a href="https://modrinth.com/mod/sodium" target="_blank">Get Mod</a></div>
-                <div class="mod-card"><h3>PolyPatcher (1.8.9)</h3><a href="https://modrinth.com/mod/polypatcher" target="_blank">Get Mod</a></div>
+                <div class="mod-card"><h3>Lithium<span class="version-tag">1.21</span></h3><a href="https://modrinth.com/mod/lithium" target="_blank">Get Mod</a></div>
+                <div class="mod-card"><h3>Mod Menu<span class="version-tag">Prospector</span></h3><a href="https://modrinth.com/mod/modmenu" target="_blank">Get Mod</a></div>
+                <div class="mod-card"><h3>Sodium</h3><a href="https://modrinth.com/mod/sodium" target="_blank">Get Mod</a></div>
+                <div class="mod-card"><h3>Low Fire</h3><a href="https://modrinth.com/resourcepack/low-on-fire" target="_blank">Get Pack</a></div>
             </div>
         </div>
     </section>
 </main>
 
 <footer>
-    <p>&copy; 2026 Ultra Pro Hub | Designed for the Community</p>
+    <p>&copy; 2026 Ultra Pro Hub | Not affiliated with Mojang</p>
 </footer>
 
 <script>
-    /* --- Particles --- */
+    /* Background Particles */
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let pts = [];
     function init() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         pts = [];
-        for(let i=0; i<60; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()-0.5, vy:Math.random()-0.5});
+        for(let i=0; i<50; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()-0.5, vy:Math.random()-0.5});
     }
     function draw() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "#2ecc71";
+        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "#00ff8822";
         pts.forEach(p => {
             p.x += p.vx; p.y += p.vy;
             if(p.x<0 || p.x>canvas.width) p.vx*=-1;
@@ -213,7 +199,7 @@
     }
     window.onresize = init; init(); draw();
 
-    /* --- Tabs --- */
+    /* Tab Switcher */
     document.querySelectorAll('.nav-link').forEach(link => {
         link.onclick = () => {
             document.querySelectorAll('.nav-link, .tab-content').forEach(el => el.classList.remove('active'));
@@ -222,21 +208,21 @@
         };
     });
 
-    /* --- Music & Theme --- */
+    /* Music & Theme */
     const music = document.getElementById('bgMusic');
     document.getElementById('musicToggle').onclick = (e) => {
         if(music.paused) { music.play(); e.target.innerText = "⏸️ Pause Music"; }
         else { music.pause(); e.target.innerText = "🎵 Play Music"; }
     };
     document.getElementById('themeToggle').onclick = () => {
-        const body = document.body;
-        body.dataset.theme = body.dataset.theme === 'light' ? '' : 'light';
+        document.body.dataset.theme = document.body.dataset.theme === 'light' ? '' : 'light';
     };
 
-    /* --- CPS Tester --- */
+    /* CPS Tester */
     let clicks = 0, time = 5, active = false;
-    const area = document.getElementById('cps-area');
-    area.onmousedown = () => {
+    const area = document.getElementById('cps-area'), resetBtn = document.getElementById('reset-cps');
+    area.onmousedown = (e) => {
+        e.preventDefault();
         if(time <= 0) return;
         if(!active) {
             active = true;
@@ -245,28 +231,35 @@
                 if(time <= 0) {
                     clearInterval(timer);
                     document.getElementById('cps-result').innerText = "Result: " + (clicks/5).toFixed(2) + " CPS";
-                    area.innerText = "Done!";
+                    area.innerText = "Time Up!";
+                    resetBtn.style.display = 'block';
                 }
             }, 1000);
         }
         clicks++; document.getElementById('clicks').innerText = clicks;
     };
+    resetBtn.onclick = () => {
+        clicks = 0; time = 5; active = false;
+        document.getElementById('clicks').innerText = '0';
+        document.getElementById('timer').innerText = '5';
+        document.getElementById('cps-result').innerText = '';
+        area.innerText = 'Click to Start!';
+        resetBtn.style.display = 'none';
+    };
 
-    /* --- FPS Logic --- */
-    function showFps(type) {
+    /* FPS Logic */
+    function showFps(t) {
         document.getElementById('fps-init').style.display = 'none';
-        if(type === 'pc') document.getElementById('fps-pc').style.display = 'block';
+        if(t === 'pc') document.getElementById('fps-pc').style.display = 'block';
         else {
-            const res = document.getElementById('fps-res');
-            res.style.display = 'block';
-            res.innerHTML = "<strong>Mojo Settings:</strong><br>• Resolution: 70%<br>• Particles: OFF<br>• Renderer: Holy GL4ES<br>• Close all background apps!";
+            const res = document.getElementById('fps-res'); res.style.display = 'block';
+            res.innerHTML = "<b>Mojo Phone Optimization:</b><br>• Renderer: Holy GL4ES<br>• Resolution: 75%<br>• Particles: Minimal<br>• Chunk Loading: Threaded";
         }
     }
     function calcPc() {
         const ram = document.getElementById('ramInput').value;
-        const res = document.getElementById('fps-res');
-        res.style.display = 'block';
-        res.innerHTML = `<strong>PC Settings:</strong><br>• Allocate: ${Math.floor(ram/2)}GB RAM<br>• Graphics: Fast<br>• Particles: Minimal<br>• Render Distance: 8`;
+        const res = document.getElementById('fps-res'); res.style.display = 'block';
+        res.innerHTML = `<b>Recommended PC Settings:</b><br>• JVM RAM: ${Math.floor(ram/2)}GB<br>• Graphics: Fast<br>• Simulation Distance: 6<br>• Smooth Lighting: OFF`;
     }
 </script>
 </body>
